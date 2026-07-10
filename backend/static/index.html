@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lumora — Study from your own notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.5/purify.min.js"></script>
+<link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- AUTH SCREEN                                                   -->
+<!-- ============================================================ -->
+<div id="auth-screen" class="auth-screen">
+  <div class="auth-glow" aria-hidden="true"></div>
+
+  <div class="auth-card">
+    <div class="auth-brand">
+      <span class="wordmark">Lumora<span class="wordmark-underline" aria-hidden="true"></span></span>
+      <p class="tagline">Study from your own notes. Nothing else.</p>
+    </div>
+
+    <div class="auth-tabs" role="tablist">
+      <button class="auth-tab is-active" id="tab-login" role="tab" aria-selected="true">Log in</button>
+      <button class="auth-tab" id="tab-signup" role="tab" aria-selected="false">Sign up</button>
+    </div>
+
+    <form id="login-form" class="auth-form">
+      <label class="field-label" for="login-email">Email</label>
+      <input class="field-input" type="email" id="login-email" required autocomplete="email" placeholder="you@example.com" />
+
+      <label class="field-label" for="login-password">Password</label>
+      <input class="field-input" type="password" id="login-password" required autocomplete="current-password" placeholder="••••••••" />
+
+      <button type="submit" class="btn-primary" id="login-submit">Log in</button>
+      <p class="form-message" id="login-message" role="status"></p>
+    </form>
+
+    <form id="signup-form" class="auth-form" hidden>
+      <label class="field-label" for="signup-email">Email</label>
+      <input class="field-input" type="email" id="signup-email" required autocomplete="email" placeholder="you@example.com" />
+
+      <label class="field-label" for="signup-password">Password</label>
+      <input class="field-input" type="password" id="signup-password" required autocomplete="new-password" minlength="6" placeholder="At least 6 characters" />
+
+      <button type="submit" class="btn-primary" id="signup-submit">Create account</button>
+      <p class="form-message" id="signup-message" role="status"></p>
+    </form>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- APP SHELL (shown after login)                                 -->
+<!-- ============================================================ -->
+<div id="app-shell" class="app-shell" hidden>
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="wordmark wordmark-sm">Lumora</span>
+    </div>
+
+    <nav class="tab-nav" aria-label="Study tools">
+      <button class="tab-btn is-active" data-tab="notes">
+        <span class="tab-icon">📄</span> Notes
+      </button>
+      <button class="tab-btn" data-tab="chat">
+        <span class="tab-icon">💬</span> Chat
+      </button>
+      <button class="tab-btn" data-tab="flashcards">
+        <span class="tab-icon">🗂️</span> Flashcards
+      </button>
+      <button class="tab-btn" data-tab="quiz">
+        <span class="tab-icon">📝</span> Quiz
+      </button>
+      <button class="tab-btn" data-tab="planner">
+        <span class="tab-icon">🗓️</span> Study Planner
+      </button>
+      <button class="tab-btn" data-tab="predictor">
+        <span class="tab-icon">🎯</span> Exam Predictor
+      </button>
+      <button class="tab-btn" data-tab="mindmap">
+        <span class="tab-icon">🧠</span> Mind Map
+      </button>
+      <button class="tab-btn" data-tab="dashboard">
+        <span class="tab-icon">📊</span> Dashboard
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <span class="user-email" id="user-email-display"></span>
+      </div>
+      <button class="btn-logout" id="logout-btn">Log out</button>
+    </div>
+  </aside>
+
+  <main class="content-area">
+    <div class="tab-panel is-active" id="panel-notes">
+      <div class="panel-header">
+        <h1 class="panel-title">Notes</h1>
+        <p class="panel-subtitle">Upload your notes — everything else in Lumora studies from exactly what you put here, and nowhere else.</p>
+      </div>
+
+      <form id="upload-form">
+        <label for="upload-file" class="dropzone" id="dropzone">
+          <input type="file" id="upload-file" accept=".pdf,.docx,.txt" required hidden />
+          <div class="dropzone-icon">↑</div>
+          <p class="dropzone-text"><strong>Drop a file here</strong> or click to browse</p>
+          <p class="dropzone-hint">PDF, DOCX, or TXT · up to 8 MB</p>
+          <p class="dropzone-filename" id="dropzone-filename"></p>
+        </label>
+
+        <div class="upload-row" id="upload-row" hidden>
+          <input type="text" id="upload-title" placeholder="Give it a title (optional)" class="field-input upload-title-input" />
+          <button type="submit" class="btn-primary upload-submit" id="upload-submit">Upload note</button>
+        </div>
+      </form>
+
+      <div class="notes-section-label" id="notes-section-label" hidden>Your notes</div>
+      <div id="notes-list" class="notes-list">
+        <div class="empty-state" id="notes-empty">
+          <div class="empty-state-icon">📄</div>
+          <p class="empty-state-title">No notes yet</p>
+          <p class="empty-state-body">Upload your first file above to start building your private study library.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel-chat">
+      <div class="panel-header">
+        <h1 class="panel-title">Chat</h1>
+        <p class="panel-subtitle">Ask questions and get answers grounded in your notes, with citations.</p>
+      </div>
+      <div class="coming-soon"><span class="coming-soon-badge">Next up</span> This tab goes live in the next build stage.</div>
+    </div>
+
+    <div class="tab-panel" id="panel-flashcards">
+      <div class="panel-header">
+        <h1 class="panel-title">Flashcards</h1>
+        <p class="panel-subtitle">AI-generated cards with real SM-2 spaced repetition.</p>
+      </div>
+      <div class="coming-soon"><span class="coming-soon-badge">Coming soon</span> Built after Chat is live.</div>
+    </div>
+
+    <div class="tab-panel" id="panel-quiz">
+      <div class="panel-header">
+        <h1 class="panel-title">Quiz</h1>
+        <p class="panel-subtitle">Mixed AI-generated quizzes, graded with explanations.</p>
+      </div>
+      <div class="coming-soon"><span class="coming-soon-badge">Coming soon</span> Built after Flashcards is live.</div>
+    </div>
+
+    <div class="tab-panel" id="panel-planner">
+      <div class="panel-header">
+        <h1 class="panel-title">Study Planner</h1>
+        <p class="panel-subtitle">A day-by-day plan that prioritizes your weak topics.</p>
+      </div>
+      <div class="coming-soon"><span class="coming-soon-badge">Coming soon</span> Built after Quiz is live.</div>
+    </div>
+
+    <div class="tab-panel" id="panel-predictor">
+      <div class="panel-header">
+        <h1 class="panel-title">Exam Predictor</h1>
+        <p class="panel-subtitle">Your readiness percentage, based on real quiz history.</p>
+      </div>
+      <div class="coming-soon"><span class="coming-soon-badge">Coming soon</span> Built after Planner is live.</div>
+    </div>
+
+    <div class="tab-panel" id="panel-mindmap">
+      <div class="panel-header">
+        <h1 class="panel-title">Mind Map</h1>
+        <p class="panel-subtitle">A visual topic breakdown of any note.</p>
+      </div>
+      <div class="coming-soon"><span class="coming-soon-badge">Coming soon</span> Built after Predictor is live.</div>
+    </div>
+
+    <div class="tab-panel" id="panel-dashboard">
+      <div class="panel-header">
+        <h1 class="panel-title">Dashboard</h1>
+        <p class="panel-subtitle">Totals, quiz average, and weak/strong topics.</p>
+      </div>
+      <div class="coming-soon"><span class="coming-soon-badge">Coming soon</span> Built last, once there's real performance data to show.</div>
+    </div>
+  </main>
+</div>
+
+<script src="/static/js/app.js"></script>
+
+<div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+</body>
+</html>
